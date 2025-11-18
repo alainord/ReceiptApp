@@ -35,7 +35,7 @@
       const folder = "recipes";
 
       // GitHub API: list files in the /recipes folder
-      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/${folder}`;
 
       try {
         const res = await fetch(apiUrl);
