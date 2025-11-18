@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recipe Book</title>
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      max-width: 800px; 
-      margin: auto; 
-      padding: 20px; 
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
     }
+
     .recipe-card {
       border: 1px solid #ccc;
       padding: 15px;
@@ -19,6 +21,7 @@
     }
   </style>
 </head>
+
 <body>
   <h1>📚 Recipe Book</h1>
   <p>Welcome to your collaborative recipe book. To add recipes, go to <a href="/admin">/admin</a>.</p>
@@ -27,33 +30,36 @@
 
   <script>
     async function loadRecipes() {
-      const folder = "recipes";
-      const res = await fetch(folder);
-      const html = await res.text();
+      try {
+        // This URL is generated automatically by Decap CMS
+        const res = await fetch('/admin/collections/recipes/entries');
+        const data = await res.json();
 
-      const files = [...html.matchAll(/href="([^"]+\.md)"/g)].map(m => m[1]);
+        const container = document.getElementById("recipe-list");
+        container.innerHTML = "";
 
-      const container = document.getElementById("recipe-list");
-      container.innerHTML = "";
+        data.forEach(entry => {
+          const title = entry.data.title;
+          const desc = entry.data.description;
+          const slug = entry.slug;
 
-      for (const file of files) {
-        const r = await fetch(`${folder}/${file}`);
-        const md = await r.text();
-
-        const title = md.match(/title: "(.*?)"/)?.[1] || file;
-        const desc = md.match(/description: "(.*?)"/)?.[1] || "";
-
-        container.innerHTML += `
+          container.innerHTML += `
           <div class="recipe-card">
             <h2>${title}</h2>
             <p>${desc}</p>
-            <a href="recipes/${file}" target="_blank">Open file</a>
+            <a href="/recipes/${slug}.md" target="_blank">Open recipe</a>
           </div>
         `;
+        });
+
+      } catch (err) {
+        console.error("Error loading recipes:", err);
       }
     }
 
     loadRecipes();
   </script>
+
 </body>
+
 </html>
