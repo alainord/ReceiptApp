@@ -14,78 +14,101 @@
 
   <div id="recipe-list" class="grid"></div>
 
-  <script>
-    async function loadRecipes() {
-      const owner = "alainord";
-      const repo = "ReceiptApp";
-      const folder = "recipes";
+<script>
+async function loadRecipes() {
+  const container = document.getElementById("recipe-list");
+  container.innerHTML = "";
 
-      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
+  const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
 
-      try {
-        const res = await fetch(apiUrl);
-        const files = await res.json();
+  let files = [];
 
-        const container = document.getElementById("recipe-list");
-        container.innerHTML = "";
+  if (isLocal) {
+    // LOCAL MODE: read files from ./recipes folder (for development)
+    try {
+      const dirRes = await fetch("./recipes/");
+      const text = await dirRes.text();
+      const doc = new DOMParser().parseFromString(text, "text/html");
+      const links = [...doc.querySelectorAll("a")];
+      files = links
+        .map(a => a.getAttribute("href"))
+        .filter(h => h && h.endsWith(".md"))
+        .map(name => ({
+          name,
+          url: `./recipes/${name}`
+        }));
+    } catch(e) {
+      console.error("Local loading failed:", e);
+    }
+  }
 
-        if (!Array.isArray(files) || files.length === 0) {
-          container.innerHTML = `<p class="empty">No recipes yet.</p>`;
-          return;
-        }
+  if (!isLocal) {
+    // ONLINE MODE: load from GitHub
+    const owner = "alainord";
+    const repo = "ReceiptApp";
+    const folder = "recipes";
 
-        for (const file of files.filter(f => f.name.endsWith(".md"))) {
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
+    const res = await fetch(apiUrl);
+    const ghFiles = await res.json();
 
-          const rawMdUrl = file.download_url;
-          const mdText = await fetch(rawMdUrl).then(r => r.text());
+    files = ghFiles
+      .filter(f => f.name.endsWith(".md"))
+      .map(f => ({
+        name: f.name,
+        url: f.download_url
+      }));
+  }
 
-          const title = mdText.match(/^#\s+(.*)/m)?.[1]?.trim() || file.name;
+  if (files.length === 0) {
+    container.innerHTML = `<p class="empty">No recipes found.</p>`;
+    return;
+  }
 
-          const desc = mdText
-            .replace(/^#.*$/m, "")
-            .trim()
-            .split("\n")
-            .find(line => line.trim().length > 0)
-            ?.trim() || "";
+  // parse each file
+  for (const file of files) {
+    const mdText = await fetch(file.url).then(r => r.text());
 
-          const imageMatch = mdText.match(/!\[[^\]]*\]\((.*?)\)/);
-          const image = imageMatch ? imageMatch[1] : "";
+    const title = mdText.match(/^#\s+(.*)/m)?.[1]?.trim() || file.name;
 
-          let tag = "";
-          const tagSection = mdText.match(/##\s*Tags([\s\S]*?)(##|$)/i);
-          if (tagSection) {
-            const tagLines = tagSection[1]
-              .split("\n")
-              .map(l => l.replace(/[-*]\s*/, "").trim())
-              .filter(Boolean);
-            tag = tagLines[0] || "";
-          }
+    const desc = mdText
+      .replace(/^#.*$/m, "")
+      .trim()
+      .split("\n")
+      .find(l => l.trim().length > 0)
+      ?.trim() || "";
 
-          const recipeUrl = `recipe.html?file=${encodeURIComponent(file.name)}`;
+    const imageMatch = mdText.match(/!\[[^\]]*\]\((.*?)\)/);
+    const image = imageMatch ? imageMatch[1] : "";
 
-          container.innerHTML += `
-        <article class="recipe-card">
-          ${image ? `<img src="${image}" alt="${title}" class="recipe-image" />` : `<div class="recipe-image no-img"></div>`}
-          ${tag ? `<span class="recipe-tag">${tag}</span>` : ""}
-          <h2 class="recipe-title">${title}</h2>
-          <p class="recipe-desc">${desc}</p>
-          <div class="card-footer">
-            <a class="btn" href="${recipeUrl}">View recipe</a>
-          </div>
-        </article>
-      `;
-        }
-
-      } catch (err) {
-        console.error("Error loading recipes:", err);
-        document.getElementById("recipe-list").innerHTML =
-          `<p class="empty">Could not load recipes. Try again later.</p>`;
-      }
+    let tag = "";
+    const tagSection = mdText.match(/##\s*Tags([\s\S]*?)(##|$)/i);
+    if (tagSection) {
+      const tagLines = tagSection[1]
+        .split("\n")
+        .map(l => l.replace(/[-*]\s*/, "").trim())
+        .filter(Boolean);
+      tag = tagLines[0] || "";
     }
 
-    loadRecipes();
-  </script>
+    const recipeUrl = `recipe.html?file=${encodeURIComponent(file.name)}`;
 
+    container.innerHTML += `
+      <article class="recipe-card">
+        ${image ? `<img src="${image}" alt="${title}" class="recipe-image" />` : `<div class="recipe-image no-img"></div>`}
+        ${tag ? `<span class="recipe-tag">${tag}</span>` : ""}
+        <h2 class="recipe-title">${title}</h2>
+        <p class="recipe-desc">${desc}</p>
+        <div class="card-footer">
+          <a class="btn" href="${recipeUrl}">View recipe</a>
+        </div>
+      </article>
+    `;
+  }
+}
+
+loadRecipes();
+</script>
 
 </body>
 
