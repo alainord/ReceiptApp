@@ -37,4 +37,3 @@ A sweet–savory bacon spread with caramelized onions, garlic, balsamic vinegar 
 - sauce
 - spread
 - condiment
-- smashburgers ingredient
