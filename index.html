@@ -35,27 +35,22 @@
         }
 
         for (const file of files.filter(f => f.name.endsWith(".md"))) {
+
           const rawMdUrl = file.download_url;
           const mdText = await fetch(rawMdUrl).then(r => r.text());
 
-          // Extract TITLE = first "# "
-          const titleMatch = mdText.match(/^[ \t]*#\s+(.*)$/m);
-          console.log("MD Text:", mdText);
-          const title = titleMatch ? titleMatch[1].trim() : file.name;
-          console.log("Title:", title);
-          // Extract DESCRIPTION = first paragraph after title
-          const desc = (() => {
-            const withoutTitle = mdText.replace(/^[ \t]*#.*$/m, "").trim(); // remove title line allowing leading spaces
-            const firstParagraphLine = withoutTitle.split("\n").find(line => line.trim().length > 0);
-            return firstParagraphLine ? firstParagraphLine.trim() : "";
-          })().trim() || "";
+          const title = mdText.match(/^#\s+(.*)/m)?.[1]?.trim() || file.name;
 
-          // Extract FIRST IMAGE: ![alt](url)
+          const desc = mdText
+            .replace(/^#.*$/m, "")
+            .trim()
+            .split("\n")
+            .find(line => line.trim().length > 0)
+            ?.trim() || "";
+
           const imageMatch = mdText.match(/!\[[^\]]*\]\((.*?)\)/);
           const image = imageMatch ? imageMatch[1] : "";
 
-          // Extract TAGS block:
-          // ## Tags ... then bullet list
           let tag = "";
           const tagSection = mdText.match(/##\s*Tags([\s\S]*?)(##|$)/i);
           if (tagSection) {
@@ -63,22 +58,22 @@
               .split("\n")
               .map(l => l.replace(/[-*]\s*/, "").trim())
               .filter(Boolean);
-            tag = tagLines[0] || ""; // use first tag
+            tag = tagLines[0] || "";
           }
 
           const recipeUrl = `recipe.html?file=${encodeURIComponent(file.name)}`;
 
           container.innerHTML += `
-          <article class="recipe-card">
-            ${image ? `<img src="${image}" alt="${title}" class="recipe-image" />` : `<div class="recipe-image no-img"></div>`}
-            ${tag ? `<span class="recipe-tag">${tag}</span>` : ""}
-            <h2 class="recipe-title">${title}</h2>
-            <p class="recipe-desc">${desc}</p>
-            <div class="card-footer">
-              <a class="btn" href="${recipeUrl}">View recipe</a>
-            </div>
-          </article>
-        `;
+        <article class="recipe-card">
+          ${image ? `<img src="${image}" alt="${title}" class="recipe-image" />` : `<div class="recipe-image no-img"></div>`}
+          ${tag ? `<span class="recipe-tag">${tag}</span>` : ""}
+          <h2 class="recipe-title">${title}</h2>
+          <p class="recipe-desc">${desc}</p>
+          <div class="card-footer">
+            <a class="btn" href="${recipeUrl}">View recipe</a>
+          </div>
+        </article>
+      `;
         }
 
       } catch (err) {
@@ -90,6 +85,7 @@
 
     loadRecipes();
   </script>
+
 
 </body>
 
