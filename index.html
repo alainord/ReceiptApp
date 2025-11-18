@@ -30,23 +30,23 @@
 
   <script>
     async function loadRecipes() {
+
       const owner = "alainord";
       const repo = "ReceiptApp";
       const folder = "recipes";
 
-      // GitHub API: list files in the /recipes folder
-      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/${folder}`;
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
 
       try {
         const res = await fetch(apiUrl);
         const files = await res.json();
 
+        console.log("FILES:", files); // DEBUG
+
         const container = document.getElementById("recipe-list");
         container.innerHTML = "";
 
-        // Loop through each .md file
         for (const file of files.filter(f => f.name.endsWith(".md"))) {
-
           const rawMdUrl = file.download_url;
           const mdText = await fetch(rawMdUrl).then(r => r.text());
 
@@ -54,12 +54,12 @@
           const desc = mdText.match(/description: "(.*?)"/)?.[1] || "";
 
           container.innerHTML += `
-          <div class="recipe-card">
-            <h2>${title}</h2>
-            <p>${desc}</p>
-            <a href="${rawMdUrl}" target="_blank">Open recipe</a>
-          </div>
-        `;
+        <div class="recipe-card">
+          <h2>${title}</h2>
+          <p>${desc}</p>
+          <a href="${rawMdUrl}" target="_blank">Open recipe</a>
+        </div>
+      `;
         }
 
       } catch (err) {
@@ -69,6 +69,7 @@
 
     loadRecipes();
   </script>
+
 
 </body>
 
