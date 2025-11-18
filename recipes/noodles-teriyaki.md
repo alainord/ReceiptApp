@@ -1,27 +1,35 @@
-# Noodles Teriyaki pazos
+# Noodles Teriyaki
 
-A plate of noodles with teriyaki sauce.
+A flavorful and comforting dish made with tender chicken, sautéed vegetables, and rice noodles coated in a rich teriyaki sauce.
 
 ![Noodles Teriyaki](/images/noodles-teriyaki.jpg)
 
 ## Ingredients
 
-- Chicken
+**Protein & Base**
+- Chicken (sliced)
 - Rice noodles
-- Paprika
+
+**Vegetables**
+- Paprika (red pepper)
 - Onion
 - Broccoli
-- Mixed vegetables
+- Mixed vegetables of your choice
+
+**Sauce**
+- Teriyaki sauce
 
 ## Steps
 
-1. Cut the vegetables and cook them in a pan until tender.
-2. Cut the chicken and cook it in a separate pan until done.
-3. Cook the noodles 5 minutes in boiling water, then drain.
-4. When the vegetables are done, add teriyaki sauce, then add the chicken and noodles. Mix well and serve.
+1. Slice all vegetables and cook them in a pan over medium heat until they soften.
+2. Cut the chicken into small pieces and cook it in a separate pan until golden and fully cooked.
+3. Cook the rice noodles in boiling water for about 5 minutes, then drain.
+4. Once the vegetables are ready, add the teriyaki sauce and stir to coat evenly.
+5. Add the cooked chicken and noodles to the pan. Mix everything well so the flavors combine.
+6. Serve hot.
 
 ## Tags
 
-- Chicken
+- Healthy
 - Noodles
 - Asian food

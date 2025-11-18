@@ -14,101 +14,107 @@
 
   <div id="recipe-list" class="grid"></div>
 
-<script>
-async function loadRecipes() {
-  const container = document.getElementById("recipe-list");
-  container.innerHTML = "";
+  <script>
+    async function loadRecipes() {
+      const container = document.getElementById("recipe-list");
+      container.innerHTML = "";
 
-  const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+      const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+      
 
-  let files = [];
+      let files = [];
 
-  if (isLocal) {
-    // LOCAL MODE: read files from ./recipes folder (for development)
-    try {
-      const dirRes = await fetch("./recipes/");
-      const text = await dirRes.text();
-      const doc = new DOMParser().parseFromString(text, "text/html");
-      const links = [...doc.querySelectorAll("a")];
-      files = links
-        .map(a => a.getAttribute("href"))
-        .filter(h => h && h.endsWith(".md"))
-        .map(name => ({
-          name,
-          url: `./recipes/${name}`
-        }));
-    } catch(e) {
-      console.error("Local loading failed:", e);
-    }
-  }
+      if (isLocal) {
+        // LOCAL MODE: read files from ./recipes folder (for development)
+        try {
+          console.log("isLocal");
+          const dirRes = await fetch("./recipes/");
+          const text = await dirRes.text();
+          const doc = new DOMParser().parseFromString(text, "text/html");
+          const links = [...doc.querySelectorAll("a")];
+          files = links
+            .map(a => a.getAttribute("href"))
+            .filter(h => h && h.endsWith(".md"))
+            .map(name => ({
+              name,
+              url: `${name}`
+            }));
+        } catch (e) {
+          console.error("Local loading failed:", e);
+        }
+      }
 
-  if (!isLocal) {
-    // ONLINE MODE: load from GitHub
-    const owner = "alainord";
-    const repo = "ReceiptApp";
-    const folder = "recipes";
+      if (!isLocal) {
+        // ONLINE MODE: load from GitHub
+        console.log("Not Local");
+        const owner = "alainord";
+        const repo = "ReceiptApp";
+        const folder = "recipes";
 
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
-    const res = await fetch(apiUrl);
-    const ghFiles = await res.json();
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
+        const res = await fetch(apiUrl);
+        const ghFiles = await res.json();
 
-    files = ghFiles
-      .filter(f => f.name.endsWith(".md"))
-      .map(f => ({
-        name: f.name,
-        url: f.download_url
-      }));
-  }
+        files = ghFiles
+          .filter(f => f.name.endsWith(".md"))
+          .map(f => ({
+            name: f.name,
+            url: f.download_url
+          }));
+      }
 
-  if (files.length === 0) {
-    container.innerHTML = `<p class="empty">No recipes found.</p>`;
-    return;
-  }
+      if (files.length === 0) {
+        container.innerHTML = `<p class="empty">No recipes found.</p>`;
+        return;
+      }
 
-  // parse each file
-  for (const file of files) {
-    const mdText = await fetch(file.url).then(r => r.text());
+      // parse each file
+      for (const file of files) {
+        const mdText = await fetch(file.url).then(r => r.text());
 
-    const title = mdText.match(/^#\s+(.*)/m)?.[1]?.trim() || file.name;
+        const title = mdText.match(/^#\s+(.*)/m)?.[1]?.trim() || file.name;
 
-    const desc = mdText
-      .replace(/^#.*$/m, "")
-      .trim()
-      .split("\n")
-      .find(l => l.trim().length > 0)
-      ?.trim() || "";
+        const desc = mdText
+          .replace(/^#.*$/m, "")
+          .trim()
+          .split("\n")
+          .find(l => l.trim().length > 0)
+          ?.trim() || "";
 
-    const imageMatch = mdText.match(/!\[[^\]]*\]\((.*?)\)/);
-    const image = imageMatch ? imageMatch[1] : "";
+        const imageMatch = mdText.match(/!\[[^\]]*\]\((.*?)\)/);
+        const image = imageMatch ? imageMatch[1] : "";
 
-    let tag = "";
-    const tagSection = mdText.match(/##\s*Tags([\s\S]*?)(##|$)/i);
-    if (tagSection) {
-      const tagLines = tagSection[1]
-        .split("\n")
-        .map(l => l.replace(/[-*]\s*/, "").trim())
-        .filter(Boolean);
-      tag = tagLines[0] || "";
-    }
+        let tags = [];
+        const tagSection = mdText.match(/##\s*Tags([\s\S]*?)(##|$)/i);
+        if (tagSection) {
+          tags = tagSection[1]
+            .split("\n")
+            .map(l => l.replace(/[-*]\s*/, "").trim())
+            .filter(Boolean);
+        }
 
-    const recipeUrl = `recipe.html?file=${encodeURIComponent(file.name)}`;
 
-    container.innerHTML += `
+        const cleanName = file.name.replace(/^recipes\//, "");
+        const recipeUrl = `recipe.html?file=${encodeURIComponent(cleanName)}`;
+        container.innerHTML += `
       <article class="recipe-card">
         ${image ? `<img src="${image}" alt="${title}" class="recipe-image" />` : `<div class="recipe-image no-img"></div>`}
-        ${tag ? `<span class="recipe-tag">${tag}</span>` : ""}
+        ${tags.length ? `
+          <div class="tag-list">
+            ${tags.map(t => `<span class="recipe-tag">${t}</span>`).join("")}
+          </div>
+        ` : ""}
         <h2 class="recipe-title">${title}</h2>
-        <p class="recipe-desc">${desc}</p>
         <div class="card-footer">
           <a class="btn" href="${recipeUrl}">View recipe</a>
         </div>
       </article>
     `;
-  }
-}
+      }
+    }
 
-loadRecipes();
-</script>
+    loadRecipes();
+  </script>
 
 </body>
 
