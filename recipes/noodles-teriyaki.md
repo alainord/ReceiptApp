@@ -1,7 +1,7 @@
 ---
 title: "Noodles teriyaki "
 description: A plate of noodles with teriyaki sauce.
-image: /images/noodles-teriyaki.jpg
+image: "/images/noodles-teriyaki.jpg"
 ingredients:
   - Chicken, rice noodles, paprika, onion, brocoli, vegetables as you want
 steps:
