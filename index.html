@@ -10,70 +10,45 @@
 
 <body class="home">
   <h1>📚 Recipe Book</h1>
+
   <p class="subtitle">Your shared Erasmus recipes in one clean place.</p>
+  <input type="text" id="search-input" placeholder="Search recipes by title or tags..." class="search-bar" />
 
   <div id="recipe-list" class="grid"></div>
 
   <script>
+    let allRecipes = []; // 🔥 Aquí guardamos todas las recetas ya parseadas
+
     async function loadRecipes() {
       const container = document.getElementById("recipe-list");
-      container.innerHTML = "";
-
       const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-      
-
       let files = [];
 
       if (isLocal) {
-        // LOCAL MODE: read files from ./recipes folder (for development)
-        try {
-          console.log("isLocal");
-          const dirRes = await fetch("./recipes/");
-          const text = await dirRes.text();
-          const doc = new DOMParser().parseFromString(text, "text/html");
-          const links = [...doc.querySelectorAll("a")];
-          files = links
-            .map(a => a.getAttribute("href"))
-            .filter(h => h && h.endsWith(".md"))
-            .map(name => ({
-              name,
-              url: `${name}`
-            }));
-        } catch (e) {
-          console.error("Local loading failed:", e);
-        }
-      }
-
-      if (!isLocal) {
-        // ONLINE MODE: load from GitHub
-        console.log("Not Local");
+        const dirRes = await fetch("./recipes/");
+        const text = await dirRes.text();
+        const doc = new DOMParser().parseFromString(text, "text/html");
+        const links = [...doc.querySelectorAll("a")];
+        files = links
+          .map(a => a.getAttribute("href"))
+          .filter(h => h && h.endsWith(".md"))
+          .map(name => ({ name, url: name }));
+      } else {
         const owner = "alainord";
         const repo = "ReceiptApp";
         const folder = "recipes";
-
         const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
         const res = await fetch(apiUrl);
         const ghFiles = await res.json();
-
         files = ghFiles
           .filter(f => f.name.endsWith(".md"))
-          .map(f => ({
-            name: f.name,
-            url: f.download_url
-          }));
+          .map(f => ({ name: f.name, url: f.download_url }));
       }
 
-      if (files.length === 0) {
-        container.innerHTML = `<p class="empty">No recipes found.</p>`;
-        return;
-      }
-
-      // parse each file
       for (const file of files) {
         const mdText = await fetch(file.url).then(r => r.text());
 
         const title = mdText.match(/^#\s+(.*)/m)?.[1]?.trim() || file.name;
-
         const desc = mdText
           .replace(/^#.*$/m, "")
           .trim()
@@ -93,28 +68,109 @@
             .filter(Boolean);
         }
 
+        const recipeUrl = `recipe.html?file=${encodeURIComponent(file.name)}`;
 
-        const cleanName = file.name.replace(/^recipes\//, "");
-        const recipeUrl = `recipe.html?file=${encodeURIComponent(cleanName)}`;
-        container.innerHTML += `
-      <article class="recipe-card">
-        ${image ? `<img src="${image}" alt="${title}" class="recipe-image" />` : `<div class="recipe-image no-img"></div>`}
-        ${tags.length ? `
-          <div class="tag-list">
-            ${tags.map(t => `<span class="recipe-tag">${t}</span>`).join("")}
-          </div>
-        ` : ""}
-        <h2 class="recipe-title">${title}</h2>
-        <div class="card-footer">
-          <a class="btn" href="${recipeUrl}">View recipe</a>
-        </div>
-      </article>
-    `;
+        // Guarda receta en array
+        allRecipes.push({
+          title,
+          desc,
+          image,
+          tags,
+          url: recipeUrl
+        });
       }
+
+      renderRecipes(allRecipes);
     }
+
+    function renderRecipes(list) {
+      const container = document.getElementById("recipe-list");
+      container.innerHTML = "";
+
+      if (!list.length) {
+        container.innerHTML = `<p class="empty">No matching recipes found.</p>`;
+        return;
+      }
+
+      list.forEach(r => {
+        container.innerHTML += `
+        <article class="recipe-card">
+          ${r.image ? `<img src="${r.image}" class="recipe-image" />` : `<div class="recipe-image no-img"></div>`}
+          
+          ${r.tags.length ? `
+            <div class="tag-list">
+              ${r.tags
+              .map(t => `<span class="recipe-tag" data-tag="${t}">${t}</span>`)
+              .join("")}
+            </div>
+          ` : ""}
+
+
+
+          <h2 class="recipe-title">${r.title}</h2>
+          <p class="recipe-desc">${r.desc}</p>
+
+          <div class="card-footer">
+            <a class="btn" href="${r.url}">View recipe</a>
+          </div>
+        </article>
+      `;
+      });
+    }
+
+    // 🔎 SEARCH FUNCTION
+    document.getElementById("search-input").addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase();
+
+      const filtered = allRecipes.filter(r =>
+        r.title.toLowerCase().includes(query) ||
+        r.tags.some(t => t.toLowerCase().includes(query))
+      );
+
+      renderRecipes(filtered);
+    });
+    // 🔥 Click on tag triggers search
+    document.addEventListener("click", e => {
+      if (e.target.classList.contains("recipe-tag")) {
+        const tag = e.target.dataset.tag.toLowerCase();
+
+        document.getElementById("search-input").value = tag;
+
+        const filtered = allRecipes.filter(r =>
+          r.tags.some(t => t.toLowerCase().includes(tag))
+        );
+
+        renderRecipes(filtered);
+      }
+    });
+
+    // When the page loads, check if there is a ?tag=
+    window.addEventListener("load", () => {
+      const params = new URLSearchParams(window.location.search);
+      const tagFromUrl = params.get("tag");
+
+      if (tagFromUrl) {
+        const input = document.getElementById("search-input");
+        const query = tagFromUrl.toLowerCase();
+
+        // Fill input
+        input.value = tagFromUrl;
+
+        // Filter recipes
+        const filtered = allRecipes.filter(r =>
+          r.tags.some(t => t.toLowerCase().includes(query)) ||
+          r.title.toLowerCase().includes(query)
+        );
+
+        renderRecipes(filtered);
+      }
+    });
+
+
 
     loadRecipes();
   </script>
+
 
 </body>
 

@@ -75,6 +75,16 @@ h1 {
   margin-bottom: 8px;
 }
 
+.recipe-tag {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.recipe-tag:hover {
+  background: #dcdcdc;
+}
+
+
 .card-footer {
   margin-top: auto;
   display: flex;
@@ -145,14 +155,26 @@ h1 {
   border-radius: 999px;
   margin-bottom: 8px;
 }
+
 .tag-list {
   display: flex;
   gap: 6px;
 }
 
-h1 + .subtitle {
+h1+.subtitle {
   margin-top: 4px;
   margin-bottom: 12px;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 14px;
+  margin: 10px auto 20px auto;
+  display: block;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
 .section-title {

@@ -162,29 +162,32 @@
           <p class="subtitle">${desc}</p>
 
           ${tags.length ? `
-            <div class="tag-list">
-              ${tags.map(t => `<span class="recipe-tag">${t}</span>`).join("")}
-            </div>
-          ` : ""}
+          <div class="tag-list">
+            ${tags
+              .map(t => `<span class="recipe-tag" data-tag="${t}">${t}</span>`)
+              .join("")}
+          </div>
+        ` : ""}
+
 
          ${ingredients.length ? `
           <h2 class="section-title">Ingredients</h2>
 
           ${(() => {
-            // Group by category
-            const groups = {};
-            for (const ing of ingredients) {
-              if (!groups[ing.category]) groups[ing.category] = [];
-              groups[ing.category].push(ing.item);
-            }
+              // Group by category
+              const groups = {};
+              for (const ing of ingredients) {
+                if (!groups[ing.category]) groups[ing.category] = [];
+                groups[ing.category].push(ing.item);
+              }
 
-            return Object.entries(groups).map(([cat, items]) => `
+              return Object.entries(groups).map(([cat, items]) => `
               <h3 class="ingredient-category">${cat}</h3>
               <ul>
                 ${items.map(i => `<li>${i}</li>`).join("")}
               </ul>
             `).join("");
-          })()}
+            })()}
         ` : ""}
 
 
@@ -199,6 +202,15 @@
             ${bodyHtml}
           </div>
         `;
+
+        // Click on tag → go back to index with ?tag=
+        document.addEventListener("click", e => {
+          if (e.target.classList.contains("recipe-tag")) {
+            const tag = encodeURIComponent(e.target.dataset.tag);
+            window.location.href = `index.html?tag=${tag}`;
+          }
+        });
+
       } catch (err) {
         console.error(err);
         document.getElementById("recipe-card").innerHTML =
