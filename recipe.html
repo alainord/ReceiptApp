@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recipe</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+      padding: 18px 18px 22px;
+      overflow: hidden;
+    }
+
+    .back {
+      margin-bottom: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: #444;
+    }
+
+    .back:hover {
+      text-decoration: underline;
+    }
+
+    .hero-image {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      background: #eee;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: #eef4ff;
+      color: #3756d5;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 4px 0 6px;
+      font-size: 1.5rem;
+    }
+
+    .subtitle {
+      margin: 0 0 12px;
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    .section-title {
+      margin-top: 18px;
+      margin-bottom: 6px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #666;
+    }
+
+    ul {
+      padding-left: 1.2rem;
+    }
+
+    .content {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .content ul {
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back">← Back to recipes</a>
+
+  <article class="card" id="recipe-card">
+    <p>Loading recipe…</p>
+  </article>
+
+  <script>
+    async function loadRecipe() {
+      const params = new URLSearchParams(window.location.search);
+      const file = params.get("file");
+
+      if (!file) {
+        document.getElementById("recipe-card").innerHTML = "<p>No recipe selected.</p>";
+        return;
+      }
+
+      const owner = "alainord";
+      const repo = "ReceiptApp";
+      const folder = "recipes";
+      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${folder}/${file}`;
+
+      try {
+        const mdText = await fetch(rawUrl).then(r => r.text());
+
+        // Split frontmatter and body
+        let frontmatter = "";
+        let body = mdText;
+
+        const fmMatch = mdText.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+        if (fmMatch) {
+          frontmatter = fmMatch[1];
+          body = fmMatch[2];
+        }
+
+        const getField = (name) => {
+          const regex = new RegExp(`^${name}:\\s*"(.*?)"\\s*$`, "m");
+          return frontmatter.match(regex)?.[1] || "";
+        };
+
+        const title = getField("title") || file.replace(".md", "");
+        const description = getField("description");
+        const image = getField("image");
+        const tag = getField("tag");
+
+        // Try to extract ingredients & steps from frontmatter lists (if present)
+        const ingredients = [];
+        const steps = [];
+
+        const ingBlockMatch = frontmatter.match(/ingredients:\s*\n([\s\S]*?)(\n[a-zA-Z]|$)/);
+        if (ingBlockMatch) {
+          const lines = ingBlockMatch[1].split("\n");
+          for (const line of lines) {
+            const m = line.match(/-+\s*item:\s*"(.*?)"/);
+            if (m) ingredients.push(m[1]);
+          }
+        }
+
+        const stepsBlockMatch = frontmatter.match(/steps:\s*\n([\s\S]*?)(\n[a-zA-Z]|$)/);
+        if (stepsBlockMatch) {
+          const lines = stepsBlockMatch[1].split("\n");
+          for (const line of lines) {
+            const m = line.match(/-+\s*item:\s*"(.*?)"/);
+            if (m) steps.push(m[1]);
+          }
+        }
+
+        const card = document.getElementById("recipe-card");
+
+        card.innerHTML = `
+          ${image ? `<img src="${image}" alt="${title}" class="hero-image" />` : ""}
+          ${tag ? `<div class="tag">${tag}</div>` : ""}
+          <h1>${title}</h1>
+          ${description ? `<p class="subtitle">${description}</p>` : ""}
+
+          ${ingredients.length ? `
+            <h2 class="section-title">Ingredients</h2>
+            <ul>
+              ${ingredients.map(i => `<li>${i}</li>`).join("")}
+            </ul>
+          ` : ""}
+
+          ${steps.length ? `
+            <h2 class="section-title">Steps</h2>
+            <ol>
+              ${steps.map(s => `<li>${s}</li>`).join("")}
+            </ol>
+          ` : ""}
+
+          <div class="content">
+            ${marked.parse(body)}
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+        document.getElementById("recipe-card").innerHTML =
+          "<p>Could not load this recipe. Maybe it was deleted.</p>";
+      }
+    }
+
+    loadRecipe();
+  </script>
+</body>
+</html>
