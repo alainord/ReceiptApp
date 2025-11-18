@@ -1,111 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recipe Book</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body { 
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; 
-      max-width: 1000px; 
-      margin: 0 auto; 
-      padding: 24px; 
-      background: #f5f5f5;
-      color: #222;
-    }
-
-    h1 {
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      margin-top: 0;
-      margin-bottom: 24px;
-      color: #555;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-    }
-
-    .recipe-card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 14px 14px 16px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.06);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .recipe-image {
-      width: 100%;
-      height: 160px;
-      border-radius: 10px;
-      object-fit: contain;
-      background: #eee;
-      margin-bottom: 12px;
-    }
-
-    .recipe-title {
-      margin: 0 0 6px;
-      font-size: 1.1rem;
-    }
-
-    .recipe-desc {
-      margin: 0 0 10px;
-      color: #555;
-      font-size: 0.9rem;
-    }
-
-    .recipe-tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      background: #eef4ff;
-      color: #3756d5;
-      padding: 3px 8px;
-      border-radius: 999px;
-      margin-bottom: 8px;
-    }
-
-    .card-footer {
-      margin-top: auto;
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: none;
-      background: #222;
-      color: #fff;
-      font-size: 0.85rem;
-      text-decoration: none;
-      cursor: pointer;
-      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
-    }
-
-    .btn:hover {
-      background: #000;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.18);
-      transform: translateY(-1px);
-    }
-
-    .empty {
-      color: #777;
-      font-size: 0.9rem;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+
+<body class="home">
   <h1>📚 Recipe Book</h1>
   <p class="subtitle">Your shared Erasmus recipes in one clean place.</p>
 
@@ -127,7 +30,7 @@
         container.innerHTML = "";
 
         if (!Array.isArray(files) || files.length === 0) {
-          container.innerHTML = `<p class="empty">No recipes yet – add one from /admin 😊</p>`;
+          container.innerHTML = `<p class="empty">No recipes yet.</p>`;
           return;
         }
 
@@ -135,37 +38,59 @@
           const rawMdUrl = file.download_url;
           const mdText = await fetch(rawMdUrl).then(r => r.text());
 
-          // Very simple frontmatter parsing
-          const title = mdText.match(/title:\s*"(.*?)"/)?.[1] || file.name;
-          const desc = mdText.match(/description:\s*"(.*?)"/)?.[1] || "";
-          const image = mdText.match(/image:\s*"(.*?)"/)?.[1] || "";
-          const tag   = mdText.match(/tag:\s*"(.*?)"/)?.[1] || "";
+          // Extract TITLE = first "# "
+          const titleMatch = mdText.match(/^[ \t]*#\s+(.*)$/m);
+          console.log("MD Text:", mdText);
+          const title = titleMatch ? titleMatch[1].trim() : file.name;
+          console.log("Title:", title);
+          // Extract DESCRIPTION = first paragraph after title
+          const desc = (() => {
+            const withoutTitle = mdText.replace(/^[ \t]*#.*$/m, "").trim(); // remove title line allowing leading spaces
+            const firstParagraphLine = withoutTitle.split("\n").find(line => line.trim().length > 0);
+            return firstParagraphLine ? firstParagraphLine.trim() : "";
+          })().trim() || "";
 
-          // Link to pretty HTML page instead of raw markdown
-          const fileParam = encodeURIComponent(file.name);
-          const recipeUrl = `recipe.html?file=${fileParam}`;
+          // Extract FIRST IMAGE: ![alt](url)
+          const imageMatch = mdText.match(/!\[[^\]]*\]\((.*?)\)/);
+          const image = imageMatch ? imageMatch[1] : "";
+
+          // Extract TAGS block:
+          // ## Tags ... then bullet list
+          let tag = "";
+          const tagSection = mdText.match(/##\s*Tags([\s\S]*?)(##|$)/i);
+          if (tagSection) {
+            const tagLines = tagSection[1]
+              .split("\n")
+              .map(l => l.replace(/[-*]\s*/, "").trim())
+              .filter(Boolean);
+            tag = tagLines[0] || ""; // use first tag
+          }
+
+          const recipeUrl = `recipe.html?file=${encodeURIComponent(file.name)}`;
 
           container.innerHTML += `
-            <article class="recipe-card">
-              ${image ? `<img src="${image}" alt="${title}" class="recipe-image" />` : `<div class="recipe-image"></div>`}
-              ${tag ? `<span class="recipe-tag">${tag}</span>` : ""}
-              <h2 class="recipe-title">${title}</h2>
-              <p class="recipe-desc">${desc}</p>
-              <div class="card-footer">
-                <a class="btn" href="${recipeUrl}">View recipe</a>
-              </div>
-            </article>
-          `;
+          <article class="recipe-card">
+            ${image ? `<img src="${image}" alt="${title}" class="recipe-image" />` : `<div class="recipe-image no-img"></div>`}
+            ${tag ? `<span class="recipe-tag">${tag}</span>` : ""}
+            <h2 class="recipe-title">${title}</h2>
+            <p class="recipe-desc">${desc}</p>
+            <div class="card-footer">
+              <a class="btn" href="${recipeUrl}">View recipe</a>
+            </div>
+          </article>
+        `;
         }
 
       } catch (err) {
         console.error("Error loading recipes:", err);
-        const container = document.getElementById("recipe-list");
-        container.innerHTML = `<p class="empty">Could not load recipes. Try again later.</p>`;
+        document.getElementById("recipe-list").innerHTML =
+          `<p class="empty">Could not load recipes. Try again later.</p>`;
       }
     }
 
     loadRecipes();
   </script>
+
 </body>
+
 </html>
