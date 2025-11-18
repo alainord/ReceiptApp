@@ -2,7 +2,7 @@
 
 A sweet–savory bacon spread with caramelized onions, garlic, balsamic vinegar and a hint of coffee or whisky. Perfect for burgers, sandwiches, toast, or cheese boards.
 
-![Dish image](/images/bacon-jam.jpg)
+![Dish image](/images/Bacon-jam.PNG)
 
 ## Ingredients
 
