@@ -30,27 +30,37 @@
 
   <script>
     async function loadRecipes() {
+      const owner = "alainord";
+      const repo = "ReceiptApp";
+      const folder = "recipes";
+
+      // GitHub API: list files in the /recipes folder
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
+
       try {
-        // This URL is generated automatically by Decap CMS
-        const res = await fetch('/admin/collections/recipes/entries');
-        const data = await res.json();
+        const res = await fetch(apiUrl);
+        const files = await res.json();
 
         const container = document.getElementById("recipe-list");
         container.innerHTML = "";
 
-        data.forEach(entry => {
-          const title = entry.data.title;
-          const desc = entry.data.description;
-          const slug = entry.slug;
+        // Loop through each .md file
+        for (const file of files.filter(f => f.name.endsWith(".md"))) {
+
+          const rawMdUrl = file.download_url;
+          const mdText = await fetch(rawMdUrl).then(r => r.text());
+
+          const title = mdText.match(/title: "(.*?)"/)?.[1] || file.name;
+          const desc = mdText.match(/description: "(.*?)"/)?.[1] || "";
 
           container.innerHTML += `
           <div class="recipe-card">
             <h2>${title}</h2>
             <p>${desc}</p>
-            <a href="/recipes/${slug}.md" target="_blank">Open recipe</a>
+            <a href="${rawMdUrl}" target="_blank">Open recipe</a>
           </div>
         `;
-        });
+        }
 
       } catch (err) {
         console.error("Error loading recipes:", err);
