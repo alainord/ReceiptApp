@@ -6,6 +6,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recipe Book</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Small popover video anchored to the clicked button */
+    .btn-video-popover {
+      position: absolute;
+      width: 220px;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      z-index: 9999;
+      transform-origin: top center;
+      animation: pop 150ms ease-out;
+    }
+    @keyframes pop { from { transform: scale(0.9); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+    .btn-video-popover video { display:block; width:100%; height:auto; background:#000 }
+    .btn-video-popover .close-small {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      z-index: 2;
+    }
+  </style>
 </head>
 
 <body class="home">
@@ -168,6 +197,90 @@
 
 
     loadRecipes();
+  </script>
+
+  <script>
+    (function () {
+      const VIDEO_SRC = './images/6-7.mp4';
+
+      // Create & show a small popover anchored to the button
+      function showPopoverAt(button, href) {
+        // Remove any existing popover
+        const existing = document.querySelector('.btn-video-popover');
+        if (existing) existing.remove();
+
+        const pop = document.createElement('div');
+        pop.className = 'btn-video-popover';
+
+        const close = document.createElement('button');
+        close.className = 'close-small';
+        close.textContent = '✕';
+        pop.appendChild(close);
+
+        const vid = document.createElement('video');
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('webkit-playsinline', '');
+        vid.preload = 'auto';
+        vid.src = VIDEO_SRC;
+        vid.autoplay = true;
+        vid.loop = false;
+        vid.muted = false;
+        vid.controls = false;
+        pop.appendChild(vid);
+
+        document.body.appendChild(pop);
+
+        // Position the popover near the button
+        const rect = button.getBoundingClientRect();
+        const popW = 220;
+        const top = window.scrollY + rect.top - 8 - popW * 0.6; // try above
+        const left = window.scrollX + rect.left + (rect.width / 2) - (popW / 2);
+
+        pop.style.left = Math.max(8, left) + 'px';
+        pop.style.top = Math.max(8, top) + 'px';
+
+        function cleanupAndNavigate() {
+          try { vid.pause(); } catch (e) {}
+          pop.remove();
+          if (href) window.location.href = href;
+        }
+
+        // If autoplay blocked, show controls so user can start it
+        const p = vid.play();
+        if (p && typeof p.then === 'function') {
+          p.catch(() => { vid.controls = true; });
+        }
+
+        vid.addEventListener('ended', cleanupAndNavigate);
+        vid.addEventListener('error', cleanupAndNavigate);
+
+        close.addEventListener('click', () => {
+          cleanupAndNavigate();
+        });
+
+        // If user clicks outside the popover, close and navigate
+        function outsideClick(e) {
+          if (!pop.contains(e.target) && e.target !== button) {
+            cleanupAndNavigate();
+            document.removeEventListener('click', outsideClick);
+          }
+        }
+
+        setTimeout(() => document.addEventListener('click', outsideClick), 0);
+      }
+
+      // Intercept .btn clicks, play small popover video, then navigate
+      document.addEventListener('click', function (e) {
+        const btn = e.target.closest && e.target.closest('.btn');
+        if (!btn) return;
+
+        const href = btn.getAttribute('href');
+        if (!href) return;
+
+        e.preventDefault();
+        showPopoverAt(btn, href);
+      });
+    })();
   </script>
 
 
