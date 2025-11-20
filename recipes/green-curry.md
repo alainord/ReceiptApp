@@ -3,7 +3,7 @@
 A creamy risotto with green curry, chicken and stir-fried vegetables. Warm, aromatic and quick to prepare — perfect for an easy flavorful dinner.
 
 <!-- If you have a real GIF file -->
-![Dish image](/images/6-7.gif)
+![Dish image](/images/6-7.mp4)
 
 <!-- If you only have MP4 and want it to behave like a GIF -->
 
