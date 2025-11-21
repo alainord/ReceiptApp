@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "prebuild": "node js/generateManifest.js"
+  }
+}

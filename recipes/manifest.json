@@ -1,0 +1,39 @@
+[
+  {
+    "slug": "bacon-jam",
+    "title": "Bacon Jam",
+    "description": "",
+    "image": "/images/Bacon-jam.PNG",
+    "tags": [
+      "bacon",
+      "jam",
+      "sauce",
+      "spread",
+      "condiment"
+    ]
+  },
+  {
+    "slug": "green-curry",
+    "title": "Green Curry Risotto",
+    "description": "",
+    "image": "/images/6-7.mp4",
+    "tags": [
+      "risotto",
+      "curry",
+      "healthy",
+      "chicken",
+      "asian"
+    ]
+  },
+  {
+    "slug": "noodles-teriyaki",
+    "title": "Noodles Teriyaki",
+    "description": "",
+    "image": "/images/noodles-teriyaki.jpg",
+    "tags": [
+      "Healthy",
+      "Noodles",
+      "Asian food"
+    ]
+  }
+]
