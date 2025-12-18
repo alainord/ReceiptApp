@@ -13,6 +13,31 @@
     ]
   },
   {
+    "slug": "gnocchi-with zucchini",
+    "title": "Red Pesto Chicken & Zucchini Gnocchi Bake",
+    "description": "",
+    "image": "/images/IMAGE_NAME.jpg",
+    "tags": [
+      "quick",
+      "pasta",
+      "chicken",
+      "oven"
+    ]
+  },
+  {
+    "slug": "greek-plate",
+    "title": "Greek dish tray bake",
+    "description": "",
+    "image": "/images/Greek-traybake.jpg",
+    "tags": [
+      "Greek",
+      "Chicken",
+      "Healthy",
+      "Easy",
+      "Oven"
+    ]
+  },
+  {
     "slug": "green-curry",
     "title": "Green Curry Risotto",
     "description": "",

@@ -29,6 +29,7 @@ async function loadRecipes() {
   }));
 
   renderRecipes(allRecipes);
+  window.dispatchEvent(new Event("recipes-loaded"));
 }
 
 window.addEventListener("load", loadRecipes);
