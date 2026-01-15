@@ -117,7 +117,7 @@ async function loadRecipe() {
     /* -----------------------------
        CLEAN BODY FOR RENDERING
     ------------------------------*/
-    let cleanedMd = mdText;
+    let cleanedMd = mdNoFrontMatter;
 
     cleanedMd = cleanedMd.replace(/^#\s+.*$/m, "");
 
@@ -176,7 +176,7 @@ async function loadRecipe() {
         <h2 class="section-title">Steps</h2>
         <ol>${steps.map(s => `<li>${s}</li>`).join("")}</ol>
       ` : ""}
-
+      <h2 class="section-title">Description</h2>
       <div class="content">${bodyHtml}</div>
     `;
 

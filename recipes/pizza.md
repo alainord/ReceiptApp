@@ -3,7 +3,7 @@ servings: 1
 --- 
 # wrap pizza
 
-a healthy pizza for those days that you want something tasty without eating too much
+A healthy pizza for those days that you want something tasty without eating too much
 
 ![Dish image](/images/pizza.jpg)
 
@@ -25,7 +25,9 @@ a healthy pizza for those days that you want something tasty without eating too 
 
 ## Steps
 
-1. Put in the air fryer or oven one wrap with tomato and the whipped cheese with oregano, then put another wrap above more tomato there, and all the toppings you want. Lastly cook till the pizza is warm and the cheese is melted.
+1. Put in the air fryer or oven one wrap with tomato and the whipped cheese with oregano
+2. Put another wrap above more tomato there and the toppings you want
+3. Lastly cook till the pizza is warm and the cheese is melted.
 
 ## Tags
 
