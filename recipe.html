@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -13,11 +12,31 @@
 <body class="recipe">
   <a href="index.html" class="back">← Back to recipes</a>
 
+  <button id="openCooking" class="cook-btn">🍳 Cooking mode</button>
+
   <article class="card" id="recipe-card">
     <p>Loading recipe…</p>
   </article>
 
+  <!-- ✅ Cooking Mode Overlay -->
+  <div id="cookingOverlay" class="cook-overlay hidden" aria-hidden="true">
+    <div class="cook-header">
+      <span id="cookProgress">Step 1 / 1</span>
+      <button id="closeCooking" class="cook-close" type="button" aria-label="Close">✕</button>
+    </div>
+
+    <div class="cook-content">
+      <p id="cookStepText"></p>
+    </div>
+
+    <div class="cook-controls">
+      <button id="prevStep" type="button">⬅️</button>
+      <button id="nextStep" type="button">➡️</button>
+    </div>
+  </div>
+
   <!-- Script separado -->
   <script src="js/recipe-loader.js"></script>
+  <script src="js/cooking-mode.js"></script>
 </body>
 </html>
