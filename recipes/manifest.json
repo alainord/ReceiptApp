@@ -60,5 +60,16 @@
       "Noodles",
       "Asian food"
     ]
+  },
+  {
+    "slug": "pizza",
+    "title": "wrap pizza",
+    "description": "",
+    "image": "/images/pizza.jpg",
+    "tags": [
+      "fast",
+      "tasty",
+      "healthier"
+    ]
   }
 ]

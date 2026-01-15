@@ -27,11 +27,27 @@ async function loadRecipe() {
 
   try {
     const mdText = await fetch(rawUrl).then((r) => r.text());
+    // -----------------------------
+    // FRONT MATTER (e.g. servings)
+    // -----------------------------
+    let servings = "";
+
+    const fmMatch = mdText.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+    if (fmMatch) {
+      const fmContent = fmMatch[1];
+
+      // Busca línea tipo: servings: 2
+      const servingsMatch = fmContent.match(/^\s*servings\s*:\s*(.+)\s*$/im);
+      if (servingsMatch) servings = servingsMatch[1].trim();
+    }
+    // Remove front matter from content to avoid showing it
+
+    const mdNoFrontMatter = mdText.replace(/^\s*---\s*\n[\s\S]*?\n---\s*\n?/, "");
 
     /* -----------------------------
        EXTRACT TITLE, DESC, IMAGE
     ------------------------------*/
-    const title = mdText.match(/^#\s+(.*)/m)?.[1]?.trim() || cleanFile;
+    const title = mdNoFrontMatter.match(/^#\s+(.*)/m)?.[1]?.trim() || cleanFile;
 
     const desc =
       mdText
@@ -127,7 +143,11 @@ async function loadRecipe() {
     card.innerHTML = `
       ${heroImage ? `<img src="${heroImage}" alt="${title}" class="hero-image" />` : ""}
       <h1>${title}</h1>
-      <p class="subtitle">${desc}</p>
+      ${servings ? `
+        <div class="recipe-meta">
+          <span class="meta-pill">👤 ${servings} ${String(servings).trim() === "1" ? "person" : "people"}</span>
+        </div>
+      ` : ""}
 
       ${tags.length ? `
         <div class="tag-list">

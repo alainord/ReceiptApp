@@ -1,3 +1,7 @@
+---
+servings: 2
+---
+
 # Green Curry Risotto
 
 A creamy risotto with green curry, chicken and stir-fried vegetables. Warm, aromatic and quick to prepare — perfect for an easy flavorful dinner.
@@ -14,7 +18,7 @@ A creamy risotto with green curry, chicken and stir-fried vegetables. Warm, arom
 - 125 g risotto rice (uncooked)
 - 0.75 L water
 - 1 teaspoon bouillon powder
-- 200 ml light coconut milk
+- 50 ml light coconut milk
 
 **Protein**
 - 300 g chicken breast cubes

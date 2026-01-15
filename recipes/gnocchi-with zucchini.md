@@ -1,3 +1,7 @@
+---
+servings: 4
+---
+
 # Red Pesto Chicken & Zucchini Gnocchi Bake
 
 A simple, comforting oven-baked gnocchi dish with chicken, zucchini, and creamy red pesto. Perfect for a quick weeknight dinner.

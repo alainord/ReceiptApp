@@ -1,3 +1,7 @@
+---
+servings: 2
+---
+
 # Noodles Teriyaki
 
 A flavorful and comforting dish made with tender chicken, sautéed vegetables, and rice noodles coated in a rich teriyaki sauce.

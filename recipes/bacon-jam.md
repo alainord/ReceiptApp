@@ -1,3 +1,7 @@
+---
+servings: 6-8
+---
+
 # Bacon Jam
 
 A sweet–savory bacon spread with caramelized onions, garlic, balsamic vinegar and a hint of coffee or whisky. Perfect for burgers, sandwiches, toast, or cheese boards.

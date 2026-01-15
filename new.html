@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Add recipe • Receta</title>
+
+    <!-- If you already have styles.css, keep this -->
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+        /* Minimal fallback styles so it looks decent even if styles.css changes */
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 18px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .topbar h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .btn.primary {
+            background: #111;
+            color: #fff;
+        }
+
+        .btn.secondary {
+            background: rgba(0, 0, 0, .08);
+            color: #111;
+        }
+
+        .btn.danger {
+            background: rgba(220, 0, 0, .12);
+            color: #b30000;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.05fr .95fr;
+            gap: 16px;
+            margin-top: 14px;
+        }
+
+        @media (max-width: 980px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, .12);
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .field span {
+            font-size: 12px;
+            font-weight: 800;
+            color: rgba(0, 0, 0, .7);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            border: 1px solid rgba(0, 0, 0, .15);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: rgba(0, 0, 0, .35);
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .grow {
+            flex: 1;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .output {
+            min-height: 420px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        .checklist {
+            border: 1px dashed rgba(0, 0, 0, .18);
+            border-radius: 14px;
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .check-item {
+            font-size: 13px;
+            font-weight: 800;
+            color: rgba(0, 0, 0, .7);
+        }
+
+        .check-item.ok {
+            color: #0a7a2f;
+        }
+
+        code {
+            background: rgba(0, 0, 0, .06);
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        .hint {
+            color: rgba(0, 0, 0, .7);
+            line-height: 1.35;
+            margin: 8px 0 0;
+        }
+
+        .small {
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="topbar">
+            <h1>Add a new recipe</h1>
+            <div class="actions">
+                <a class="btn secondary" href="index.html">← Back to recipes</a>
+                <button id="reset" class="btn danger" type="button">Reset</button>
+            </div>
+        </div>
+
+        <p class="hint small">
+            Fill the form → generate Markdown → paste into <code>/recipes/</code> and upload the image into
+            <code>/images/</code>.
+        </p>
+
+        <div class="grid">
+            <!-- Left: form -->
+            <div class="card">
+                <label class="field">
+                    <span>Servings *</span>
+                    <input id="servings" type="number" min="1" step="1" placeholder="2" />
+                </label>
+
+                <label class="field">
+                    <span>Title *</span>
+                    <input id="title" type="text" placeholder="Bacon Jam" />
+                </label>
+
+                <label class="field">
+                    <span>Short description (1–2 sentences) *</span>
+                    <textarea id="desc" rows="2"
+                        placeholder="A sweet–savory bacon spread with caramelized onions..."></textarea>
+                </label>
+
+                <div class="row">
+                    <label class="field grow">
+                        <span>Image filename *</span>
+                        <input id="img" type="text" placeholder="Bacon-jam.PNG" />
+                    </label>
+                    <button id="imgSuggest" class="btn secondary" type="button">Suggest</button>
+                </div>
+
+                <div class="row">
+                    <label class="field grow">
+                        <span>Recipe filename (auto) *</span>
+                        <input id="slug" type="text" placeholder="bacon-jam.md" />
+                    </label>
+                    <button id="copySlug" class="btn secondary" type="button">Copy</button>
+                </div>
+
+                <label class="field">
+                    <span>Ingredients (categories + dashes) *</span>
+                    <textarea id="ing" rows="10" placeholder="**Bacon & Base**
+- 150 g bacon, chopped
+- 1 tbsp honey
+
+**Vegetables**
+- 1 large onion"></textarea>
+                </label>
+
+                <label class="field">
+                    <span>Steps (one per line OR already numbered) *</span>
+                    <textarea id="steps" rows="8" placeholder="Caramelize the onion.
+Cook the bacon.
+Mix everything and simmer..."></textarea>
+                </label>
+
+                <label class="field">
+                    <span>Tags (comma-separated) *</span>
+                    <input id="tags" type="text" placeholder="sweet, savory, spread" />
+                </label>
+
+                <div class="actions">
+                    <button id="generate" class="btn primary" type="button">Generate Markdown</button>
+                </div>
+
+                <div class="checklist" id="checklist">
+                    <div class="check-item" data-check="title">❌ Title</div>
+                    <div class="check-item" data-check="servings">❌ Servings</div>
+                    <div class="check-item" data-check="desc">❌ Description</div>
+                    <div class="check-item" data-check="img">❌ Image filename</div>
+                    <div class="check-item" data-check="tags">❌ Tags (min 2)</div>
+                    <div class="check-item" data-check="ing">❌ Ingredients (has “- ” lines)</div>
+                    <div class="check-item" data-check="steps">❌ Steps (min 2 lines)</div>
+                </div>
+            </div>
+
+            <!-- Right: output -->
+            <div class="card">
+                <div class="topbar" style="padding:0; margin-bottom:10px;">
+                    <h1 style="font-size:16px; margin:0;">Generated Markdown</h1>
+                    <div class="actions" style="margin:0;">
+                        <button id="copyMd" class="btn secondary" type="button">Copy</button>
+                        <button id="downloadMd" class="btn secondary" type="button">Download .md</button>
+                    </div>
+                </div>
+
+                <textarea id="out" class="output" rows="22" placeholder="Click “Generate Markdown”…"></textarea>
+
+                <p class="hint small">
+                    Tip: send your friends this page link. They fill it and send you the generated Markdown + image.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+
+        const elServings = $("servings");
+        const elTitle = $("title");
+        const elDesc = $("desc");
+        const elImg = $("img");
+        const elSlug = $("slug");
+        const elIng = $("ing");
+        const elSteps = $("steps");
+        const elTags = $("tags");
+        const elOut = $("out");
+
+        function slugify(str) {
+            return (str || "")
+                .trim()
+                .toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/&/g, "and")
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")
+                .replace(/-{2,}/g, "-");
+        }
+
+        function ensureMdFilename(name) {
+            if (!name) return "";
+            return name.toLowerCase().endsWith(".md") ? name : `${name}.md`;
+        }
+
+        function parseTags(input) {
+            return (input || "")
+                .split(",")
+                .map(t => t.trim())
+                .filter(Boolean)
+                .filter((t, i, arr) => arr.indexOf(t) === i);
+        }
+
+        function normalizeSteps(raw) {
+            const lines = (raw || "")
+                .split("\n")
+                .map(l => l.trim())
+                .filter(Boolean);
+
+            const alreadyNumbered = lines.length > 0 && lines.every(l => /^\d+\.\s+/.test(l));
+            if (alreadyNumbered) return lines.join("\n");
+            return lines.map((l, idx) => `${idx + 1}. ${l}`).join("\n");
+        }
+
+        function hasIngredientBullets(raw) {
+            const matches = (raw || "").match(/^\s*-\s+/gm);
+            return (matches && matches.length >= 2) || false;
+        }
+
+        function setCheck(key, ok) {
+            const item = document.querySelector(`.check-item[data-check="${key}"]`);
+            if (!item) return;
+            item.classList.toggle("ok", ok);
+            const label = item.textContent.replace(/^✅|^❌/, "").trim();
+            item.textContent = `${ok ? "✅" : "❌"} ${label}`;
+        }
+
+        function updateChecklist() {
+            const titleOk = (elTitle.value || "").trim().length > 0;
+            const servingsOk = Number(elServings.value) > 0;
+            const descOk = (elDesc.value || "").trim().length > 0;
+            const imgOk = (elImg.value || "").trim().length > 0;
+            const tagsOk = parseTags(elTags.value).length >= 2;
+            const ingOk = hasIngredientBullets(elIng.value);
+            const stepsLines = (elSteps.value || "").split("\n").map(s => s.trim()).filter(Boolean);
+            const stepsOk = stepsLines.length >= 2;
+
+            setCheck("title", titleOk);
+            setCheck("servings", servingsOk);
+            setCheck("desc", descOk);
+            setCheck("img", imgOk);
+            setCheck("tags", tagsOk);
+            setCheck("ing", ingOk);
+            setCheck("steps", stepsOk);
+
+            return { titleOk, descOk, imgOk, tagsOk, ingOk, stepsOk, servingsOk };
+        }
+
+        function syncSlugFromTitle() {
+            const base = slugify(elTitle.value);
+            if (!base) return;
+            if (!elSlug.dataset.touched || !elSlug.value.trim()) {
+                elSlug.value = ensureMdFilename(base);
+            }
+        }
+
+        // Live updates
+        elTitle.addEventListener("input", () => { syncSlugFromTitle(); updateChecklist(); });
+        [elDesc, elImg, elIng, elSteps, elTags].forEach(el => el.addEventListener("input", updateChecklist));
+        elSlug.addEventListener("input", () => { elSlug.dataset.touched = "1"; updateChecklist(); });
+
+        $("imgSuggest").addEventListener("click", () => {
+            const base = slugify(elTitle.value) || "recipe-image";
+            if (!elImg.value.trim()) elImg.value = `${base}.jpg`;
+            updateChecklist();
+        });
+
+        $("generate").addEventListener("click", () => {
+            updateChecklist();
+
+            const title = (elTitle.value || "").trim() || "Recipe Title";
+            const servings = Number(elServings.value) || 1;
+            const desc = (elDesc.value || "").trim() || "A short description of the dish.";
+            const img = (elImg.value || "").trim() || "IMAGE_NAME.jpg";
+
+            const ingredients = (elIng.value || "").trim() || "**Ingredients**\n- ...";
+            const steps = normalizeSteps(elSteps.value || "");
+            const tagsArr = parseTags(elTags.value);
+
+            const tagsBlock = tagsArr.length
+                ? tagsArr.map(t => `- ${t}`).join("\n")
+                : "- Tag 1\n- Tag 2";
+
+            const md =
+                `---
+servings: ${servings}
+---
+                    # ${title}
+
+${desc}
+
+![Dish image](/images/${img})
+
+## Ingredients
+
+${ingredients}
+
+## Steps
+
+${steps || "1. Step 1\n2. Step 2"}
+
+## Tags
+
+${tagsBlock}
+`;
+
+            elOut.value = md;
+
+            if (!elSlug.value.trim()) {
+                elSlug.value = ensureMdFilename(slugify(title) || "recipe");
+            }
+        });
+
+        $("copyMd").addEventListener("click", async () => {
+            const text = elOut.value || "";
+            if (!text.trim()) return;
+            try {
+                await navigator.clipboard.writeText(text);
+                $("copyMd").textContent = "Copied ✅";
+                setTimeout(() => $("copyMd").textContent = "Copy", 900);
+            } catch {
+                elOut.select();
+                document.execCommand("copy");
+                $("copyMd").textContent = "Copied ✅";
+                setTimeout(() => $("copyMd").textContent = "Copy", 900);
+            }
+        });
+
+        $("copySlug").addEventListener("click", async () => {
+            const text = elSlug.value || "";
+            if (!text.trim()) return;
+            try {
+                await navigator.clipboard.writeText(text);
+                $("copySlug").textContent = "Copied ✅";
+                setTimeout(() => $("copySlug").textContent = "Copy", 900);
+            } catch {
+                elSlug.select();
+                document.execCommand("copy");
+                $("copySlug").textContent = "Copied ✅";
+                setTimeout(() => $("copySlug").textContent = "Copy", 900);
+            }
+        });
+
+        $("downloadMd").addEventListener("click", () => {
+            const md = elOut.value || "";
+            if (!md.trim()) return;
+
+            const filename = ensureMdFilename((elSlug.value || "").trim() || "recipe.md");
+            const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            URL.revokeObjectURL(url);
+        });
+
+        $("reset").addEventListener("click", () => {
+            [elTitle, elDesc, elImg, elSlug, elIng, elSteps, elTags].forEach(el => el.value = "");
+            delete elSlug.dataset.touched;
+            elOut.value = "";
+            updateChecklist();
+            elTitle.focus();
+        });
+
+        updateChecklist();
+    </script>
+</body>
+
+</html>

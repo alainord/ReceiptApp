@@ -1,3 +1,7 @@
+---
+servings: 2-3
+---
+
 # Greek dish tray bake
 
 Really lekker tray bake with chicken and lot of vegetables.
